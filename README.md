@@ -218,19 +218,29 @@ Allows you to define `save` and `load` functions that will get called by
 and likewise `save` can do this if you have post-save tasks that need to be
 run.
 
-	YJ.sync('someprop')
+	// Somewhere in your app's code
+	YJ.sync('workplaces')
 	.save(function(val) {
-		var next = this.next;
-		setTimeout(function() {
-			localStorage['someprop'] = JSON.stringify(val);
-			next();
-		}, 300);
+		localStorage['workplaces'] = JSON.stringify(val);
+		this.next();
 	})
 	.load(function(val) {
-		var next = this.next;
-		setTimeout(function() {
-			next(JSON.parse(localStorage['someprop']));
-		}, 300);
+		this.next(JSON.parse(localStorage['workplaces']));
+	});
+
+...then, somewhere in your code, safely separated and independent:
+
+	YJ.save('workplaces', [{ address: "1"}, { address: "3" }])
+	.then(function() {
+		console.log('saved to localStorage');
+	});
+
+...and somewhere else again:
+
+	YJ.load('workplaces')
+	.then(function(workplaces) {
+		console.log('restored from localStorage');
+		console.log(workplaces);
 	});
 
 # Why call it YJunction?
