@@ -197,3 +197,5 @@ var YJ = (function() {
 	}
 	return ret;
 })();
+
+if (module && module.exports) module = module.exports = YJ;
