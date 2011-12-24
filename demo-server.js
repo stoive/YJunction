@@ -34,8 +34,8 @@ YJ.when(['windowload'])
 	}, 800);
 	setTimeout(function() {
 		self.emit('powerpoints', [{address: "1"}, {address: "3"}, {address: "4"}]);
-		}, 1200);
-		this.emit('date', new Date(ev.timeStamp));
+	}, 1200);
+	this.emit('date', new Date(ev.timeStamp));
 	})
 
 	// Data composition
