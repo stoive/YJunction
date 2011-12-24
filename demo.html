@@ -16,13 +16,11 @@
 
 			YJ.sync('someprop')
 			.save(function(val) {
-				var next = this.next;
-				setTimeout(function() {
-					localStorage['someprop'] = JSON.stringify(val);
-					next();
-				}, 300);
+				localStorage['someprop'] = JSON.stringify(val);
+				this.next();
 			})
 			.load(function(val) {
+				// simulating load speed
 				var next = this.next;
 				setTimeout(function() {
 					next(JSON.parse(localStorage['someprop']));
@@ -129,6 +127,7 @@
 			});
 
 			YJ.when(['someprop'])
+			.nowait()
 			.then(function(val) {
 				console.log('someprop thenEmit\'d');
 				val.step = "saved";
@@ -141,6 +140,10 @@
 					});
 				});
 			});
+
+			/////////////////////////
+			/// A TYPICAL EXAMPLE ///
+			/////////////////////////
 
 			YJ.when(['windowload'])
 			.then(function(ev) {
