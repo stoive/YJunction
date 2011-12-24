@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8" />
-		<title>WT Tester</title>
+		<title>YJ Tester</title>
 		<script src="/YJunction.js"></script>
 	</head>
 	<body>
@@ -14,7 +14,7 @@
 			
 			localStorage['someprop'] = JSON.stringify({step: "initial"});
 
-			WT.sync('someprop')
+			YJ.sync('someprop')
 			.save(function(val) {
 				var next = this.next;
 				setTimeout(function() {
@@ -33,7 +33,7 @@
 			//////////////////////////////
 			/// USING TIMING FUNCTIONS ///
 			//////////////////////////////
-			WT.when(['load'])
+			YJ.when(['load'])
 			.then(function() {
 				console.log('loadimmediate');
 				setTimeout(this.next, 2000);
@@ -43,10 +43,10 @@
 				this.emit('custom2');
 			});
 
-			WT.listen(window, 'load');
+			YJ.listen(window, 'load');
 
 			setTimeout(function() {
-				WT.when(['load'])
+				YJ.when(['load'])
 				.nowait()
 				.then(function() {
 					console.log('loadnowait10000');
@@ -57,18 +57,18 @@
 					}, 1000);
 				});
 
-				WT.when(['custom1'])
+				YJ.when(['custom1'])
 				.then(function() {
 					console.log('custom1wait10000shouldntcall');
 				});
 
-				WT.when(['custom2'])
+				YJ.when(['custom2'])
 				.once()
 				.then(function() {
 					console.log('custom2nowaitonce');
 				});
 
-				WT.when(['load'])
+				YJ.when(['load'])
 				.once()
 				.nowait()
 				.then(function() {
@@ -77,38 +77,38 @@
 			}, 10000);
 
 			console.log('default (expect 2)');
-			WT.when(['norm1', 'norm2', 'norm3'])
+			YJ.when(['norm1', 'norm2', 'norm3'])
 			.then(function(norm1, norm2, norm3) {
 				console.log({norm1:norm1, norm2: norm2, norm3:norm3});
 			});
 
-			WT.emit({norm1: "first", norm2: "first"});
-			WT.emit({norm2: "second", norm3: "second"});
-			WT.emit({norm1: "third", norm3: "third"});
+			YJ.emit({norm1: "first", norm2: "first"});
+			YJ.emit({norm2: "second", norm3: "second"});
+			YJ.emit({norm1: "third", norm3: "third"});
 			
 			console.log('any (expect 3)');
-			WT.when(['any1', 'any2', 'any3'])
+			YJ.when(['any1', 'any2', 'any3'])
 			.any()
 			.then(function(any1, any2, any3) {
 				console.log({any1:any1, any2: any2, any3:any3});
 			});
 			
-			WT.emit({any1: "first", any2: "first"});
-			WT.emit({any2: "second", any3: "second"});
-			WT.emit({any1: "third", any3: "third"});
+			YJ.emit({any1: "first", any2: "first"});
+			YJ.emit({any2: "second", any3: "second"});
+			YJ.emit({any1: "third", any3: "third"});
 
 			console.log('all (expect 1)')
-			WT.when(['all1', 'all2', 'all3'])
+			YJ.when(['all1', 'all2', 'all3'])
 			.all()
 			.then(function(all1, all2, all3) {
 				console.log({all1:all1, all2: all2, all3:all3});
 			});
 			
-			WT.emit({all1: "first", all2: "first"});
-			WT.emit({all2: "second", all3: "second"});
-			WT.emit({all1: "third", all2: "third", all3: "third"});
+			YJ.emit({all1: "first", all2: "first"});
+			YJ.emit({all2: "second", all3: "second"});
+			YJ.emit({all1: "third", all2: "third", all3: "third"});
 			
-			WT.do(function() {
+			YJ.do(function() {
 				var next = this.next;
 				setTimeout(function() {
 					next("do runs without waiting for anything at all");
@@ -122,25 +122,83 @@
 			/// USING SYNC FUNCTIONS ///
 			////////////////////////////
 
-			WT.load('someprop')
+			YJ.load('someprop')
 			.thenEmit()
 			.then(function(someprop) {
 				console.log(someprop);
 			});
 
-			WT.when(['someprop'])
+			YJ.when(['someprop'])
 			.then(function(val) {
 				console.log('someprop thenEmit\'d');
 				val.step = "saved";
-				WT.save('someprop', val)
+				YJ.save('someprop', val)
 				.then(function() {
 					console.log('someprop saved');
-					WT.load('someprop')
+					YJ.load('someprop')
 					.then(function(someprop) {
 						console.log('someprop load no emit: ' + localStorage['someprop']);
 					});
 				});
 			});
+
+			YJ.when(['windowload'])
+			.then(function(ev) {
+				var self = this;
+				// run two web services called in parallel
+				/*$.ajax({
+					url: "http://example.org/ws/wifiHotspots",
+					success: function(hotspots) { self.emit('hotspots', hotspots) }
+				});
+				$.ajax({
+					url: "http://example.org/ws/powerpoints",
+					success: function(powerpoints) { self.emit('powerpoints', powerpoints) }
+				});*/
+
+				// let's just simulate this.
+				setTimeout(function() {
+					self.emit('hotspots', [{address: "1"}, {address: "2"}, {address: "3"}]);
+				}, 800);
+				setTimeout(function() {
+					self.emit('powerpoints', [{address: "1"}, {address: "3"}, {address: "4"}]);
+				}, 1200);
+				this.emit('date', new Date(ev.timeStamp));
+			})
+
+			// Data composition
+
+			YJ.when(['hotspots', 'powerpoints'])
+			.then(function(hotspots, powerpoints) {
+				var hotspotsWithPowerpoints = hotspots.filter(function(hotspot) {
+					return powerpoints.some(function(powerpoint) {
+						return hotspot.address == powerpoint.address;
+					});
+				});
+
+				this.emit('workplaces', hotspotsWithPowerpoints);
+			});
+
+			// Data consumption
+
+			YJ.when(['workplaces', 'date'])
+			.then(function(workplaces, date) {
+				var start = new Date(date);
+				var h1 = document.createElement('h1');
+				h1.innerText = "Workplaces on " + date.toDateString();
+				document.body.appendChild(h1);
+
+				workplaces.forEach(function(workplace) {
+					var p = document.createElement('p');
+					p.innerText = "You can work here: " + workplace.address;
+					document.body.appendChild(p);
+				});
+				this.next(new Date().valueOf() - start.valueOf());
+			})
+			.then(function(workplaces, date, speed) {
+				console.log("rendering took " + speed + "ms");
+			});
+
+			YJ.listen(window, 'load', 'windowload');
 		</script>
 	</body>
 </html>

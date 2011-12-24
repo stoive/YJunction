@@ -33,7 +33,7 @@ requests, then compose them into some business entity your app needs:
 	.then(function(hotspots, powerpoints) {
 		var hotspotsWithPowerpoints = hotspots.filter(function(hotspot) {
 			return powerpoints.some(function(powerpoint) {
-				hotspot.address == powerpoint.address;
+				return hotspot.address == powerpoint.address;
 			});
 		});
 
@@ -44,14 +44,14 @@ requests, then compose them into some business entity your app needs:
 
 	YJ.when(['workplaces', 'date'])
 	.then(function(workplaces, date) {
-		var start = new Date();
+		var start = new Date(date);
 		var h1 = document.createElement('h1');
 		h1.innerText = "Workplaces on " + date.toDateString();
 		document.body.appendChild(h1);
 
 		workplaces.forEach(function(workplace) {
 			var p = document.createElement('p');
-			p.innerText = "<p>You can work here: " + workplace.address + "</p>";
+			p.innerText = "You can work here: " + workplace.address;
 			document.body.appendChild(p);
 		});
 		this.next(new Date().valueOf() - start.valueOf());
