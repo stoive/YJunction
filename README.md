@@ -214,7 +214,7 @@ must be passed all of the stack's dependencies at once for it to trigger.
 
 Allows you to define `save` and `load` functions that will get called by 
 `YJ.save(prop, val)` and `YJ.load(prop)`. An example is given below. Keep in mind
-`load` should call `this.next`(val)` to supply the loaded value into the stack,
+`load` should call `this.next(val)` to supply the loaded value into the stack,
 and likewise `save` can do this if you have post-save tasks that need to be
 run.
 
