@@ -203,6 +203,29 @@ then execute the stack when the remainder are supplied. With `all()`, `emit`
 must be passed all of the stack's dependencies at once for it to trigger.
 (see the second method of calling `emit`).
 
+## sync(dependency:string):{save, load}
+
+Allows you to define `save` and `load` functions that will get called by 
+`YJ.save(prop, val)` and `YJ.load(prop)`. An example is given below. Keep in mind
+`load` should call `this.next`(val)` to supply the loaded value into the stack,
+and likewise `save` can do this if you have post-save tasks that need to be
+run.
+
+	YJ.sync('someprop')
+	.save(function(val) {
+		var next = this.next;
+		setTimeout(function() {
+			localStorage['someprop'] = JSON.stringify(val);
+			next();
+		}, 300);
+	})
+	.load(function(val) {
+		var next = this.next;
+		setTimeout(function() {
+			next(JSON.parse(localStorage['someprop']));
+		}, 300);
+	});
+
 # Why call it YJunction?
 
 Why still reading this README? Go and do some work.
