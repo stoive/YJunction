@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>WT Tester</title>
+		<script src="/YJunction.js"></script>
+	</head>
+	<body>
+		<h1>Hello, this is a tester</h1>
+		<script>
+			//////////////////////
+			/// SYNC FUNCTIONS ///
+			//////////////////////
+			
+			localStorage['someprop'] = JSON.stringify({step: "initial"});
+
+			WT.sync('someprop')
+			.save(function(val) {
+				var next = this.next;
+				setTimeout(function() {
+					localStorage['someprop'] = JSON.stringify(val);
+					next();
+				}, 300);
+			})
+			.load(function(val) {
+				var next = this.next;
+				setTimeout(function() {
+					next(JSON.parse(localStorage['someprop']));
+				}, 300);
+			});
+
+
+			//////////////////////////////
+			/// USING TIMING FUNCTIONS ///
+			//////////////////////////////
+			WT.when(['load'])
+			.then(function() {
+				console.log('loadimmediate');
+				setTimeout(this.next, 2000);
+			})
+			.then(function(obj) {
+				console.log('loadthen2000 ' + obj.toString());
+				this.emit('custom2');
+			});
+
+			WT.listen(window, 'load');
+
+			setTimeout(function() {
+				WT.when(['load'])
+				.nowait()
+				.then(function() {
+					console.log('loadnowait10000');
+					this.emit('custom1');
+					var emit = this.emit;
+					setTimeout(function() {
+						emit('custom2');
+					}, 1000);
+				});
+
+				WT.when(['custom1'])
+				.then(function() {
+					console.log('custom1wait10000shouldntcall');
+				});
+
+				WT.when(['custom2'])
+				.once()
+				.then(function() {
+					console.log('custom2nowaitonce');
+				});
+
+				WT.when(['load'])
+				.once()
+				.nowait()
+				.then(function() {
+					console.log('oncenowait');
+				});
+			}, 10000);
+
+			console.log('default (expect 2)');
+			WT.when(['norm1', 'norm2', 'norm3'])
+			.then(function(norm1, norm2, norm3) {
+				console.log({norm1:norm1, norm2: norm2, norm3:norm3});
+			});
+
+			WT.emit({norm1: "first", norm2: "first"});
+			WT.emit({norm2: "second", norm3: "second"});
+			WT.emit({norm1: "third", norm3: "third"});
+			
+			console.log('any (expect 3)');
+			WT.when(['any1', 'any2', 'any3'])
+			.any()
+			.then(function(any1, any2, any3) {
+				console.log({any1:any1, any2: any2, any3:any3});
+			});
+			
+			WT.emit({any1: "first", any2: "first"});
+			WT.emit({any2: "second", any3: "second"});
+			WT.emit({any1: "third", any3: "third"});
+
+			console.log('all (expect 1)')
+			WT.when(['all1', 'all2', 'all3'])
+			.all()
+			.then(function(all1, all2, all3) {
+				console.log({all1:all1, all2: all2, all3:all3});
+			});
+			
+			WT.emit({all1: "first", all2: "first"});
+			WT.emit({all2: "second", all3: "second"});
+			WT.emit({all1: "third", all2: "third", all3: "third"});
+			
+			WT.do(function() {
+				var next = this.next;
+				setTimeout(function() {
+					next("do runs without waiting for anything at all");
+				}, 50);
+			})
+			.then(function(val) {
+				console.log(val);
+			});
+
+			////////////////////////////
+			/// USING SYNC FUNCTIONS ///
+			////////////////////////////
+
+			WT.load('someprop')
+			.thenEmit()
+			.then(function(someprop) {
+				console.log(someprop);
+			});
+
+			WT.when(['someprop'])
+			.then(function(val) {
+				console.log('someprop thenEmit\'d');
+				val.step = "saved";
+				WT.save('someprop', val)
+				.then(function() {
+					console.log('someprop saved');
+					WT.load('someprop')
+					.then(function(someprop) {
+						console.log('someprop load no emit: ' + localStorage['someprop']);
+					});
+				});
+			});
+		</script>
+	</body>
+</html>
