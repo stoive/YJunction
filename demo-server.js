@@ -1,65 +1,70 @@
 var connect = require('connect');
 var YJ = require('./YJunction.js');
 
+// A quick 'n' dirty server to serve the web page demo
+
 connect(
-	connect.static(__dirname, { /*maxAge: 1000 * 60 * 5*/ })
+	connect.static(__dirname)
 ).listen(8000);
 
+// A server-side example
 
-			YJ.when(['windowload'])
-			.then(function(ev) {
-				var self = this;
-				// run two web services called in parallel
-				/*$.ajax({
-					url: "http://example.org/ws/wifiHotspots",
-					success: function(hotspots) { self.emit('hotspots', hotspots) }
-				});
-				$.ajax({
-					url: "http://example.org/ws/powerpoints",
-					success: function(powerpoints) { self.emit('powerpoints', powerpoints) }
-				});*/
+YJ.when(['windowload'])
+.then(function(ev) {
+	var self = this;
+	// run two web services called in parallel
+	/*
 
-				// let's just simulate this.
-				setTimeout(function() {
-					self.emit('hotspots', [{address: "1"}, {address: "2"}, {address: "3"}]);
-				}, 800);
-				setTimeout(function() {
-					self.emit('powerpoints', [{address: "1"}, {address: "3"}, {address: "4"}]);
-				}, 1200);
-				this.emit('date', new Date(ev.timeStamp));
-			})
+	request({
+		url: "http://example.org/ws/wifiHotspots"
+	}, function(err, res) {
+		self.emit('hotspots', res.body);
+	});
+	request.ajax({
+		url: "http://example.org/ws/powerpoints"
+	}, function(err, res) {
+		self.emit('powerpoints', res.body);
+	});
+	
+	*/
 
-			// Data composition
+	// let's just simulate this.
+	setTimeout(function() {
+		self.emit('hotspots', [{address: "1"}, {address: "2"}, {address: "3"}]);
+	}, 800);
+	setTimeout(function() {
+		self.emit('powerpoints', [{address: "1"}, {address: "3"}, {address: "4"}]);
+		}, 1200);
+		this.emit('date', new Date(ev.timeStamp));
+	})
 
-			YJ.when(['hotspots', 'powerpoints'])
-			.then(function(hotspots, powerpoints) {
-				var hotspotsWithPowerpoints = hotspots.filter(function(hotspot) {
-					return powerpoints.some(function(powerpoint) {
-						return hotspot.address == powerpoint.address;
-					});
-				});
+	// Data composition
 
-				this.emit('workplaces', hotspotsWithPowerpoints);
+	YJ.when(['hotspots', 'powerpoints'])
+	.then(function(hotspots, powerpoints) {
+		var hotspotsWithPowerpoints = hotspots.filter(function(hotspot) {
+			return powerpoints.some(function(powerpoint) {
+				return hotspot.address == powerpoint.address;
 			});
+		});
 
-			// Data consumption
+		this.emit('workplaces', hotspotsWithPowerpoints);
+	});
 
-			YJ.when(['workplaces', 'date'])
-			.then(function(workplaces, date) {
-				var start = new Date(date);
-				//var h1 = document.createElement('h1');
-				/*h1.innerText = */ console.log("Workplaces on " + date.toDateString());
-				//document.body.appendChild(h1);
+	// Data consumption
 
-				workplaces.forEach(function(workplace) {
-					//var p = document.createElement('p');
-					/*p.innerText = */ console.log("You can work here: " + workplace.address);
-					//document.body.appendChild(p);
-				});
-				this.next(new Date().valueOf() - start.valueOf());
-			})
-			.then(function(workplaces, date, speed) {
-				console.log("rendering took " + speed + "ms");
-			});
+	YJ.when(['workplaces', 'date'])
+	.then(function(workplaces, date) {
+		var start = new Date(date);
+		console.log("Workplaces on " + date.toDateString());
 
-			YJ.emit('windowload', {timeStamp: new Date().valueOf()})
+		workplaces.forEach(function(workplace) {
+			console.log("You can work here: " + workplace.address);
+		});
+		this.next(new Date().valueOf() - start.valueOf());
+	})
+	.then(function(workplaces, date, speed) {
+		console.log("rendering took " + speed + "ms");
+	});
+
+	YJ.emit('windowload', {timeStamp: new Date().valueOf()})

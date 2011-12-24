@@ -146,14 +146,18 @@
 			.then(function(ev) {
 				var self = this;
 				// run two web services called in parallel
-				/*$.ajax({
+				/*
+				
+				$.ajax({
 					url: "http://example.org/ws/wifiHotspots",
 					success: function(hotspots) { self.emit('hotspots', hotspots) }
 				});
 				$.ajax({
 					url: "http://example.org/ws/powerpoints",
 					success: function(powerpoints) { self.emit('powerpoints', powerpoints) }
-				});*/
+				});
+				
+				*/
 
 				// let's just simulate this.
 				setTimeout(function() {
