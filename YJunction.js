@@ -1,4 +1,4 @@
-var WT = (function() {
+var YJ = (function() {
 	var dependencies = {};
 	var waiting = [];
 	var syncs = {};
