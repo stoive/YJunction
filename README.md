@@ -103,6 +103,13 @@ That's where YJunction may be able to help.
 
 Dunno. Has it?
 
+More broadly, YJ has been inspired by [CommonJS Promises](http://wiki.commonjs.org/wiki/Promises), though
+is not totally conformant (not that I could comprehend what passes as conformant from said
+linked docs). The Promises concept has been expanded with `emit` to allow forking,
+`when` to allow joining, ans `save` and `load` to allow externalisation of sync functionality.
+One could potentially wrangle YJ to conform to a CommonJS Promises proposal; the interfaces
+defined here aren't really set in stone yet.
+
 # It's only a couple of hundred lines. You've hardly done anything!
 
 I know, isn't it great!?
