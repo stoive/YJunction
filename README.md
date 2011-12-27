@@ -95,7 +95,7 @@ For example:
 			// some other async call that depends on the previous one
 			setTimeout(this.next, 500);
 		},
-		function(val1) {
+		function(val) {
 			self.emit('dependency2', val);
 			this.emit('dependency3', "foobar");
 		}
