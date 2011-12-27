@@ -42,23 +42,24 @@ requests, then compose them into some business entity your app needs:
 
 	// Data consumption
 
-	YJ.when(['workplaces', 'date'])
-	.then(function(workplaces, date) {
-		var start = new Date(date);
-		var h1 = document.createElement('h1');
-		h1.innerText = "Workplaces on " + date.toDateString();
-		document.body.appendChild(h1);
+	YJ.when(['workplaces', 'date']).then(
+		function(workplaces, date) {
+			var start = new Date(date);
+			var h1 = document.createElement('h1');
+			h1.innerText = "Workplaces on " + date.toDateString();
+			document.body.appendChild(h1);
 
-		workplaces.forEach(function(workplace) {
-			var p = document.createElement('p');
-			p.innerText = "You can work here: " + workplace.address;
-			document.body.appendChild(p);
-		});
-		this.next(new Date().valueOf() - start.valueOf());
-	})
-	.then(function(workplaces, date, speed) {
-		console.log("rendering took " + speed + "ms");
-	});
+			workplaces.forEach(function(workplace) {
+				var p = document.createElement('p');
+				p.innerText = "You can work here: " + workplace.address;
+				document.body.appendChild(p);
+			});
+			this.next(new Date().valueOf() - start.valueOf());
+		},
+		function(workplaces, date, speed) {
+			console.log("rendering took " + speed + "ms");
+		}
+	);
 
 	YJ.listen(window, 'load', 'windowload');
 
@@ -133,12 +134,14 @@ The documentation that exists is as follows.
 Start your stack with these.
 
 ### when(dependencies:Array):Stack
+### when(dependency, dependency, dependency, ...):Stack
 
 - dependencies: string names of the dependencies that
 				will trigger the stack when satisfied
 - returns:		Stack
 
 ### do():Stack
+### do(func, func, func, ...):Stack
 
 - returns:		Stack
 
@@ -177,6 +180,7 @@ object value whenever the event is triggered. Helpful for when waiting on DOM
 events. Alias defaults to `event`.
 
 ## Stack.then(func:function):Stack
+## Stack.then(func, func, func, ...):Stack
 
 Adds `func` to the stack, to be called when triggered. If the stack has already
 been triggered, then `func` gets called immediately. Parameters passed to `func`

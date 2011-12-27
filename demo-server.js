@@ -62,8 +62,8 @@ YJ.when(['windowload'])
 			console.log("You can work here: " + workplace.address);
 		});
 		this.next(new Date().valueOf() - start.valueOf());
-	})
-	.then(function(workplaces, date, speed) {
+	},
+	function(workplaces, date, speed) {
 		console.log("rendering took " + speed + "ms");
 	});
 

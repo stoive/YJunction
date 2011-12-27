@@ -54,8 +54,6 @@
 			once: function() {
 				this.once = true;
 				return this;
-				//var self = this;
-				//return { then: self.then, nowait: self.nowait, stack: self.stack, depends: self.depends, exec: self.exec, once: self.once };
 			},
 			nowait: function() {
 				// trigger if all dependencies already supplied
@@ -64,8 +62,6 @@
 					this.exec(this.depends.map(function(curr){ return dependencies[curr] }));
 				}
 				return this;
-				//var self = this;
-				//return { then: self.then, once: self.once, stack: self.stack, depends: self.depends };
 			},
 			any: function() {
 				// trigger if any value is emitted, even if some aren't yet
@@ -79,17 +75,16 @@
 				this.all = true;
 				return this;
 			},
-			then: function(func) {
-				this.stack.push(func);
+			then: function() {
+				// Allow building stack as a sequence of arguments instead of
+				// just a chain of thens
+				Array.prototype.push.apply(this.stack, arguments);
 				// block modifiers, replace with their setting
 				if (typeof(this.once) == "function") this.once = false;
 				if (typeof(this.nowait) == "function") this.nowait = false;
 				if (typeof(this.any) == "function") this.any = false;
 				if (typeof(this.any) == "function") this.any = false;
 				return this;
-				//var self = this;
-				// cannot call anything but chained `then` hereafter
-				//return { then: self.then, stack: self.stack, depends: self.depends };
 			},
 			exec: function(depends, pos) {
 				pos = pos || 0;
@@ -121,12 +116,12 @@
 					// start executing up the stack
 					if (this.stack[pos]) this.stack[pos].apply(hook, depends);
 					// once stack exhausted, override `then` to exec immediately with accrued depends
-					else this.then = function(func) {
+					else this.then = function() {
+						Array.prototype.push.apply(this.stack, arguments);
 						if (typeof(this.once) == "function") this.once = false;
 						if (typeof(this.nowait) == "function") this.nowait = false;
 						if (typeof(this.any) == "function") this.any = false;
-						this.stack.push(func);
-						func.apply(hook, depends);
+						arguments[0].apply(hook, depends);
 						return self;
 					}
 				}
@@ -149,14 +144,17 @@
 		}
 
 		var ret = {
-			do: function(func) {
+			do: function() {
 				// run immediately
 				var stack = new Stack();
-				stack.then(func);
+				// push all passed functions to stack
+				Stack.prototype.then.apply(stack, arguments);
 				stack.exec();
 				return stack;
 			},
 			when: function(depends) {
+				// pass array, or extract arguments array
+				if (!Array.isArray(depends)) depends = Array.prototype.slice.call(arguments);
 				// run when dependencies men
 				return new Stack(depends);
 			},
@@ -199,7 +197,7 @@
 		return ret;
 	})();
 
-	// module hook-innicked from underscore.js
+	// module hook-in nicked from underscore.js
 	// https://github.com/documentcloud/underscore/blob/master/underscore.js#L54
 	// MIT licenced. Thanks!
 

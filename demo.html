@@ -116,6 +116,64 @@
 				console.log(val);
 			});
 
+			////////////////////////
+			/// ALTERNATE METHOD ///
+			////////////////////////
+
+			YJ.do(
+				function() {
+					console.log('do1');
+					this.next('do2');
+				},
+				function(val1) {
+					console.log(val1);
+					this.next('do3');
+				},
+				function(val1, val2) {
+					console.log(val2);
+				}
+			);
+
+			YJ.when('load', 'someprop').then(
+				function(load, someprop) {
+					console.log('newwhen1');
+					this.next('newwhen2');
+				},
+				function(load, someprop, val1) {
+					console.log(val1);
+					this.next('newwhen3');
+				},
+				function(load, someprop, val1, val2) {
+					console.log(val2);
+				}
+			);
+
+			var ch = YJ.when('emitsometime')
+			.then(
+				function(es) {
+					console.log('es1');
+					this.next();
+				},
+				function(es) {
+					console.log('es2');
+					this.next();
+				}
+			);
+
+			YJ.emit('emitsometime');
+
+			ch.then(
+				function() {
+					console.log('es3');
+					this.next();
+				},
+				function() {
+					console.log('es4');
+				}
+			);
+			
+
+
 			////////////////////////////
 			/// USING SYNC FUNCTIONS ///
 			////////////////////////////
