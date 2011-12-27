@@ -77,21 +77,27 @@ You start by creating a 'stack' with `YJ.when`, which contains a list of depende
 that need to be met before the functions contained in the stack (constructed by the
 chain of `then`s) get called. Within each `then`, `this.emit` will register that a
 new dependency has been met, and `this.next` calls the next function in the stack
-(appending any values passed to the parameter list). E.G.:
+(appending any values passed to the parameter list).
+
+For example:
 
 	// add to stack, execute in order, immediately
 	YJ.do(
 		function() {
-			this.emit('dependency1', "Hello");
-			this.next("World");
+			var self = this;
+			// Some async call
+			setTimeout(function() {
+				self.emit('dependency1', "Hello");
+				self.next("World");
+			}, 100);
 		},
 		function(val) {
 			var self = this;
-			// some async call
+			// some other async call that depends on the previous one
 			setTimeout(function() {
 				self.emit('dependency2', val);
+				self.next("foobar");
 			}, 500);
-			this.next("foobar");
 		},
 		function(val1, val2) {
 			this.emit('dependency3', val2);
