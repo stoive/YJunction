@@ -12,7 +12,7 @@ requests, then compose them into some business entity your app needs:
 
 	// Data retrieval
 		
-    YJ.when(['windowload'])
+    YJ.when('windowload')
 	.then(function(ev) {
 		var self = this;
 		// run two web services called in parallel
@@ -29,7 +29,7 @@ requests, then compose them into some business entity your app needs:
 
 	// Data composition
 
-	YJ.when(['hotspots', 'powerpoints'])
+	YJ.when('hotspots', 'powerpoints')
 	.then(function(hotspots, powerpoints) {
 		var hotspotsWithPowerpoints = hotspots.filter(function(hotspot) {
 			return powerpoints.some(function(powerpoint) {
@@ -42,7 +42,7 @@ requests, then compose them into some business entity your app needs:
 
 	// Data consumption
 
-	YJ.when(['workplaces', 'date']).then(
+	YJ.when('workplaces', 'date').then(
 		function(workplaces, date) {
 			var start = new Date(date);
 			var h1 = document.createElement('h1');
@@ -77,7 +77,48 @@ You start by creating a 'stack' with `YJ.when`, which contains a list of depende
 that need to be met before the functions contained in the stack (constructed by the
 chain of `then`s) get called. Within each `then`, `this.emit` will register that a
 new dependency has been met, and `this.next` calls the next function in the stack
-(appending any values passed to the parameter list).
+(appending any values passed to the parameter list). E.G.:
+
+	// add to stack, execute in order, immediately
+	YJ.do(
+		function() {
+			this.emit('dependency1', "Hello");
+			this.next("World");
+		},
+		function(val) {
+			var self = this;
+			// some async call
+			setTimeout(function() {
+				self.emit('dependency2', val);
+			}, 500);
+			this.next("foobar");
+		},
+		function(val1, val2) {
+			this.emit('dependency3', val2);
+		}
+	);
+	
+	// add to stack, execute in order, when dependencies met
+	YJ.when('dependency1', 'dependency2', 'dependency3')
+	.then(
+		function(dep1, dep2, dep3) {
+			var self = this;
+			// another async call
+			setTimeout(function() {
+				self.next();
+			}, 600);
+		},
+		function(dep1, dep2, dep3) {
+			var self = this;
+			setTimeout(function() {
+				self.next("extra val 1", "extra val 2");
+			}, 400);
+		},
+		function(dep1, dep2, dep3, extra1, extra2) {
+			console.log([dep1, dep2, dep3, extra1, extra2].join(', '));
+			// "Hello, World, foobar, extra val 1, extra val 2"
+		}
+	);
 
 # Huh?
 
