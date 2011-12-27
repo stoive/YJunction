@@ -8,7 +8,10 @@
 			var triggered = Array.prototype.slice.call(arguments);
 			waiting.forEach(function(curr) {
 				var shouldExec = false;
-				if (curr.any === true) {
+				if (curr.stop === true) {
+					shouldExec = false;
+				}
+				else if (curr.any === true) {
 					// any - some depends are triggered, regardless of if all satisfied
 					shouldExec = curr.depends.some(function(depend) { return !!~triggered.indexOf(depend) });
 				}
@@ -102,6 +105,9 @@
 					},
 					reload: function(prop) {
 						syncs[prop].callLoad(this.next);
+					},
+					stop: function() {
+						self.stop = true;
 					}
 				};
 
