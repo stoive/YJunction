@@ -92,15 +92,12 @@ For example:
 			}, 100);
 		},
 		function(val) {
-			var self = this;
 			// some other async call that depends on the previous one
-			setTimeout(function() {
-				self.emit('dependency2', val);
-				self.next("foobar");
-			}, 500);
+			setTimeout(this.next, 500);
 		},
-		function(val1, val2) {
-			this.emit('dependency3', val2);
+		function(val1) {
+			self.emit('dependency2', val);
+			this.emit('dependency3', "foobar");
 		}
 	);
 	
