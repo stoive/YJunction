@@ -174,7 +174,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 		}
 
 		var ret = {
-			do: function() {
+			"do": function() {
 				// run immediately
 				var stack = new Stack();
 				// push all passed functions to stack
